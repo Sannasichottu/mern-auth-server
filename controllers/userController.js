@@ -93,3 +93,25 @@ exports.resetPassword = async(req,res) => {
     return res.json("invalid token")
   }
 }
+
+
+exports.verify = async (req,res,next) => {
+  try {
+    const token = req.cookies.token;
+    if(!token) {
+      return res.json({status:false, message:"no token"})
+    }
+    const decoded = await jwt.verify(token, process.env.KEY);
+    next()
+    return res.json({status:true, message:"authorized"})
+  } catch (err) {
+    return res.json(err)
+  }
+}
+
+
+//Logout
+exports.logoutUser = async (req,res) => {
+  res.clearCookie('token')
+  return res.json({status:true})
+}
