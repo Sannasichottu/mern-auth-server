@@ -65,9 +65,7 @@ exports.forgotPassword = async (req,res) => {
             to:email,
             subject:"Reset Password",
             text: `http://localhost:3000/resetPassword/${token}`
-          
         };
-
        transporter.sendMail(mailOptions, function(error, info){
         if(error){
             return res.json({message:"error sending email"})
@@ -75,11 +73,23 @@ exports.forgotPassword = async (req,res) => {
             return res.json({status:true, message:"email sent"})
         }
        })
-
-
-   
-
     } catch (err) {
         console.log(err)
     }
+}
+
+
+//Reset-Password
+exports.resetPassword = async(req,res) => {
+  const {token} = req.params;
+  const {password} = req.body;
+  try {
+    const decoded = await jwt.verify(token,process.env.KEY)
+    const id = decoded.id;
+    const hashpassword = await bcrypt.hash(password, 10)
+    await User.findByIdAndUpdate({_id: id}, {password:hashpassword})
+    return res.json({status:true, message:"updated password"})
+  } catch (err) {
+    return res.json("invalid token")
+  }
 }
